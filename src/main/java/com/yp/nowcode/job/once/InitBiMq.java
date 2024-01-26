@@ -1,4 +1,4 @@
-package com.yp.nowcode;
+package com.yp.nowcode.job.once;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -7,32 +7,23 @@ import com.yp.nowcode.common.ErrorCode;
 import com.yp.nowcode.constant.BiMqConstant;
 import com.yp.nowcode.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.boot.CommandLineRunner;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 主类（项目启动入口）
+ * @author yp
+ * @date: 2024/1/26
+ * 创建消息队列和交换机
+ * 单次任务的顺序是在程序运行后，但是程序运行时加载RabbitMQ，需要有这消息队列和交换机
  */
-@SpringBootApplication
-@MapperScan("com.yp.nowcode.mapper")
-@EnableScheduling
-@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+//@Component
 @Slf4j
-public class MainApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(MainApplication.class, args);
-    }
-
-    @PostConstruct
-    public void initBiMq() {
+@Deprecated
+public class InitBiMq implements CommandLineRunner {
+    @Override
+    public void run(String... args) {
         log.info("初始化消息队列和交换机");
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -54,5 +45,4 @@ public class MainApplication {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建消息队列异常");
         }
     }
-
 }

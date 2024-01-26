@@ -1,5 +1,6 @@
 package com.yp.nowcode.mq;
 
+import com.yp.nowcode.constant.BiMqConstant;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 

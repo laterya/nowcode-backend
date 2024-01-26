@@ -18,5 +18,5 @@ public interface CommonConstant {
     /**
      * BI 模型 id
      */
-    long BI_MODEL_ID = 1659171950288818178L;
+    long BI_MODEL_ID = 1750154593289240578L;
 }

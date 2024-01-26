@@ -6,7 +6,7 @@ package com.yp.nowcode.constant;
  */
 public interface ChartStatusConstant {
     //wait,running,succeed,failed
-    String GEN_COMMIT = "waiting";
+    String GEN_COMMIT = "wait";
 
     String Gen_RUNNING = "running";
 

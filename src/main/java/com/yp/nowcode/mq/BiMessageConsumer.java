@@ -2,6 +2,8 @@ package com.yp.nowcode.mq;
 
 import com.rabbitmq.client.Channel;
 import com.yp.nowcode.common.ErrorCode;
+import com.yp.nowcode.constant.BiMqConstant;
+import com.yp.nowcode.constant.ChartStatusConstant;
 import com.yp.nowcode.constant.CommonConstant;
 import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.manager.AiManager;
@@ -67,8 +69,7 @@ public class BiMessageConsumer {
         updateChartResult.setId(chart.getId());
         updateChartResult.setGenChart(genChart);
         updateChartResult.setGenResult(genResult);
-        // todo 建议定义状态为枚举值
-        updateChartResult.setStatus("succeed");
+        updateChartResult.setStatus(ChartStatusConstant.GEN_SUCCEED);
         boolean updateResult = chartService.updateById(updateChartResult);
         if (!updateResult) {
             channel.basicNack(deliveryTag, false, false);

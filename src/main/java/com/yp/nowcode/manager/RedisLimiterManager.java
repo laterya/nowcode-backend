@@ -22,8 +22,8 @@ public class RedisLimiterManager {
     public void doRateLimit(String key) {
         // 创建一个限流器
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(key);
-        // 设置限流规则(每秒2个请求；连续的请求，最多只能有1个请求被允许通过),OVERALL表示所有RateLimit实例的总速率,rate表示单位时间的访问次数,rateInterval表示时间间隔
-        rateLimiter.trySetRate(RateType.OVERALL, 2, 1, RateIntervalUnit.SECONDS);
+        // todo 限流1分钟内2个请求，不成功
+        rateLimiter.trySetRate(RateType.OVERALL, 2, 1, RateIntervalUnit.MINUTES);
         // 每当一个操作来了后，请求一个令牌
         boolean canOp = rateLimiter.tryAcquire(1);
         if (!canOp) {

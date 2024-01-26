@@ -1,4 +1,4 @@
-package com.yp.nowcode.mq;
+package com.yp.nowcode.constant;
 
 public interface BiMqConstant {
 
