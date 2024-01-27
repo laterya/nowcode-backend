@@ -1,7 +1,9 @@
 package com.yp.nowcode.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yp.nowcode.annotation.AuthCheck;
+import com.yp.nowcode.annotation.RepeatSubmit;
 import com.yp.nowcode.common.BaseResponse;
 import com.yp.nowcode.common.DeleteRequest;
 import com.yp.nowcode.common.ErrorCode;
@@ -223,6 +225,7 @@ public class ChartController {
     }
 
     @PostMapping("/gen/async/mq")
+    @RepeatSubmit(expireTime = 2)
     public BaseResponse<BiResponse> genChartByAiAsyncMq(@RequestPart("file") MultipartFile multipartFile,
                                                         GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
         String name = genChartByAiRequest.getName();
@@ -237,6 +240,18 @@ public class ChartController {
         // 限流操作
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
 
+        // todo 检测文件是否也一致
+        Chart chart = new Chart();
+        chart.setName(name);
+        chart.setGoal(goal);
+        chart.setChartType(chartType);
+        chart.setUserId(loginUser.getId());
+        // 查询数据库是否已经有了该请求
+        LambdaQueryWrapper<Chart> lqw = new LambdaQueryWrapper<>(chart);
+        Chart one = chartService.getOne(lqw, false);
+        if (one != null) {
+            throw new BusinessException(ErrorCode.OPERATION_REPEAT_ERROR, "已有该查询噢");
+        }
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();
         userInput.append("分析需求：").append("\n");
@@ -249,14 +264,9 @@ public class ChartController {
         String csvData = ExcelUtils.excelToCsv(multipartFile);
         userInput.append(csvData).append("\n");
 
-        // 插入到数据库
-        Chart chart = new Chart();
-        chart.setName(name);
-        chart.setGoal(goal);
         chart.setChartData(csvData);
-        chart.setChartType(chartType);
         chart.setStatus(ChartStatusConstant.GEN_COMMIT);
-        chart.setUserId(loginUser.getId());
+        // 插入到数据库
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
         long newChartId = chart.getId();
