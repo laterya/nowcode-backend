@@ -41,14 +41,14 @@ public class MainApplication {
              Channel channel = connection.createChannel()) {
 
             String EXCHANGE_NAME = BiMqConstant.BI_EXCHANGE_NAME;
-            channel.exchangeDeclare(EXCHANGE_NAME, "direct",
-                    // 添加可选参数，设置为持久化以应对服务器重启等情况
-                    true);
+            channel.exchangeDeclare(EXCHANGE_NAME, "direct", true);
 
             String queueName = BiMqConstant.BI_QUEUE_NAME;
             channel.queueDeclare(queueName, true, false, false, null);
             channel.queueBind(queueName, EXCHANGE_NAME, BiMqConstant.BI_ROUTING_KEY);
 
+//            channel.queueDeclare(BiMqConstant.BI_RETRY_QUEUE_NAME, true, false, false, null);
+//            channel.queueBind(BiMqConstant.BI_RETRY_QUEUE_NAME, EXCHANGE_NAME, BiMqConstant.BI_ROUTING_KEY);
         } catch (TimeoutException | IOException e) {
             log.error("创建消息队列异常", e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建消息队列异常");

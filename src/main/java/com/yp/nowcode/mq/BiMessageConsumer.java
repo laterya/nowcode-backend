@@ -1,5 +1,9 @@
 package com.yp.nowcode.mq;
 
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import com.rabbitmq.client.Channel;
 import com.yp.nowcode.common.ErrorCode;
 import com.yp.nowcode.constant.BiMqConstant;
@@ -7,6 +11,7 @@ import com.yp.nowcode.constant.ChartStatusConstant;
 import com.yp.nowcode.constant.CommonConstant;
 import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.manager.AiManager;
+import com.yp.nowcode.manager.WebSocketManager;
 import com.yp.nowcode.model.entity.Chart;
 import com.yp.nowcode.service.ChartService;
 import lombok.SneakyThrows;
@@ -18,6 +23,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -28,6 +34,9 @@ public class BiMessageConsumer {
 
     @Resource
     private AiManager aiManager;
+
+    @Resource
+    private WebSocketManager webSocketManager;
 
     // 指定程序监听的消息队列和确认机制
     @SneakyThrows
@@ -45,13 +54,18 @@ public class BiMessageConsumer {
             channel.basicNack(deliveryTag, false, false);
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图表为空");
         }
+        // 如果已经生成，直接ack
+        if (chart.getStatus().equals(ChartStatusConstant.GEN_SUCCEED)) {
+//            channel.basicAck(deliveryTag, false);
+            channel.basicNack(deliveryTag, false, false);
+        }
         // 先修改图表任务状态为 “执行中”。等执行成功后，修改为 “已完成”、保存执行结果；执行失败后，状态修改为 “失败”，记录任务失败信息。
         Chart updateChart = new Chart();
         updateChart.setId(chart.getId());
-        updateChart.setStatus("running");
+        updateChart.setStatus(ChartStatusConstant.Gen_RUNNING);
         boolean b = chartService.updateById(updateChart);
         if (!b) {
-            channel.basicNack(deliveryTag, false, false);
+            channel.basicNack(deliveryTag, false, true);
             handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
             return;
         }
@@ -59,7 +73,7 @@ public class BiMessageConsumer {
         String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, buildUserInput(chart));
         String[] splits = result.split("【【【【【");
         if (splits.length < 3) {
-            channel.basicNack(deliveryTag, false, false);
+            channel.basicNack(deliveryTag, false, true);
             handleChartUpdateError(chart.getId(), "AI 生成错误");
             return;
         }
@@ -70,12 +84,19 @@ public class BiMessageConsumer {
         updateChartResult.setGenChart(genChart);
         updateChartResult.setGenResult(genResult);
         updateChartResult.setStatus(ChartStatusConstant.GEN_SUCCEED);
-        boolean updateResult = chartService.updateById(updateChartResult);
-        if (!updateResult) {
+        Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                .retryIfResult(res -> !res)  //设置根据结果重试
+                .withWaitStrategy(WaitStrategies.fixedWait(3, TimeUnit.SECONDS)) //设置等待间隔时间
+                .withStopStrategy(StopStrategies.stopAfterAttempt(3)) //设置最大重试次数
+                .build();
+        try {
+            retryer.call(() -> chartService.updateById(updateChartResult));
+        } catch (Exception e) {
             channel.basicNack(deliveryTag, false, false);
             handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
         }
-        // 消息确认
+        // 消息确认，存在的问题是：请求ai返回过慢时，确认消息时通道已经关闭，导致消息确认失败
+        webSocketManager.sendOneMessage(chart.getUserId().toString(), "AI 生成成功");
         channel.basicAck(deliveryTag, false);
     }
 
@@ -108,7 +129,7 @@ public class BiMessageConsumer {
     private void handleChartUpdateError(long chartId, String execMessage) {
         Chart updateChartResult = new Chart();
         updateChartResult.setId(chartId);
-        updateChartResult.setStatus("failed");
+        updateChartResult.setStatus(ChartStatusConstant.GEN_REQUEST_FAILED);
         updateChartResult.setExecMessage("execMessage");
         boolean updateResult = chartService.updateById(updateChartResult);
         if (!updateResult) {

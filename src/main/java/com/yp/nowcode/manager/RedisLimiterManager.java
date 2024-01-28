@@ -22,7 +22,7 @@ public class RedisLimiterManager {
     public void doRateLimit(String key) {
         // 创建一个限流器
         RRateLimiter rateLimiter = redissonClient.getRateLimiter(key);
-        // todo 限流1分钟内2个请求，不成功
+        // 限流1分钟内2个请求
         rateLimiter.trySetRate(RateType.OVERALL, 2, 1, RateIntervalUnit.MINUTES);
         // 每当一个操作来了后，请求一个令牌
         boolean canOp = rateLimiter.tryAcquire(1);

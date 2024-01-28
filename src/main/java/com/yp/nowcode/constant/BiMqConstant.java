@@ -6,5 +6,8 @@ public interface BiMqConstant {
 
     String BI_QUEUE_NAME = "bi_queue";
 
+    String BI_RETRY_QUEUE_NAME = "bi_retry_queue";
+    String BI_RETRY_ROUTING_KEY = "bi_retry_routingKey";
+
     String BI_ROUTING_KEY = "bi_routingKey";
 }
