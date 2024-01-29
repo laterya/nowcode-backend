@@ -6,7 +6,7 @@ import com.yp.nowcode.annotation.AuthCheck;
 import com.yp.nowcode.common.BaseResponse;
 import com.yp.nowcode.common.DeleteRequest;
 import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.common.ResultUtils;
+import com.yp.nowcode.utils.ResultUtils;
 import com.yp.nowcode.constant.UserConstant;
 import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.exception.ThrowUtils;

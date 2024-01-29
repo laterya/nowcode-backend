@@ -6,9 +6,10 @@ import com.yp.nowcode.model.dto.user.UserQueryRequest;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.model.vo.LoginUserVO;
 import com.yp.nowcode.model.vo.UserVO;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 用户服务
@@ -25,6 +26,15 @@ public interface UserService extends IService<User> {
      * @return 新用户 id
      */
     long userRegister(String userAccount, String userPassword, String checkPassword);
+
+    /**
+     * 是游客
+     *
+     * @param request 要求
+     * @return {@link User}
+     */
+    User isTourist(HttpServletRequest request);
+
 
     /**
      * 用户登录
@@ -116,4 +126,5 @@ public interface UserService extends IService<User> {
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+    boolean reduceWalletBalance(Long userId, Integer reduceScore);
 }

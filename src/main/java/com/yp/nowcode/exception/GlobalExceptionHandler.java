@@ -2,7 +2,7 @@ package com.yp.nowcode.exception;
 
 import com.yp.nowcode.common.BaseResponse;
 import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.common.ResultUtils;
+import com.yp.nowcode.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

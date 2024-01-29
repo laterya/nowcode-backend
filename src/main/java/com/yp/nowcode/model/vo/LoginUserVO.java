@@ -1,12 +1,12 @@
 package com.yp.nowcode.model.vo;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 已登录用户视图（脱敏）
- *
  **/
 @Data
 public class LoginUserVO implements Serializable {
@@ -30,6 +30,16 @@ public class LoginUserVO implements Serializable {
      * 用户简介
      */
     private String userProfile;
+
+    private String userEmail;
+
+    private String userPhone;
+
+    private String accessKey;
+
+    private String secretKey;
+
+    private Long balance;
 
     /**
      * 用户角色：user/admin/ban

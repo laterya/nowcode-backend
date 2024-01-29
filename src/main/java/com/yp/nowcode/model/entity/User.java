@@ -1,17 +1,13 @@
 package com.yp.nowcode.model.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 用户
- *
  */
 @TableName(value = "user")
 @Data
@@ -57,6 +53,16 @@ public class User implements Serializable {
      * 用户简介
      */
     private String userProfile;
+
+    private String userEmail;
+
+    private String userPhone;
+
+    private String accessKey;
+
+    private String secretKey;
+
+    private Long balance;
 
     /**
      * 用户角色：user/admin/ban

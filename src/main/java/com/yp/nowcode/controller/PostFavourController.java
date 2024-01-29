@@ -3,7 +3,7 @@ package com.yp.nowcode.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yp.nowcode.common.BaseResponse;
 import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.common.ResultUtils;
+import com.yp.nowcode.utils.ResultUtils;
 import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.exception.ThrowUtils;
 import com.yp.nowcode.model.dto.post.PostQueryRequest;

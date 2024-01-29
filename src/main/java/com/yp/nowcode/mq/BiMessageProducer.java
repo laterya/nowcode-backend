@@ -14,6 +14,7 @@ public class BiMessageProducer {
 
     /**
      * 发送消息
+     *
      * @param message
      */
     public void sendMessage(String message) {

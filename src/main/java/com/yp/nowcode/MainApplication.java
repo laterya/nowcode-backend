@@ -7,6 +7,7 @@ import com.yp.nowcode.common.ErrorCode;
 import com.yp.nowcode.constant.BiMqConstant;
 import com.yp.nowcode.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 @MapperScan("com.yp.nowcode.mapper")
 @EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
+@EnableDubbo
 @Slf4j
 public class MainApplication {
 

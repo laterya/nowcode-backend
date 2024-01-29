@@ -2,7 +2,7 @@ package com.yp.nowcode.controller;
 
 import com.yp.nowcode.common.BaseResponse;
 import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.common.ResultUtils;
+import com.yp.nowcode.utils.ResultUtils;
 import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.model.dto.postthumb.PostThumbAddRequest;
 import com.yp.nowcode.model.entity.User;

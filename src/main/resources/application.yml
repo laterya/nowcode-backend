@@ -87,3 +87,13 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.yp.nowcode.controller
+
+dubbo:
+  application:
+    name: nowcode-backend-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-register
+    address: nacos://localhost:8848

@@ -1,4 +1,7 @@
-package com.yp.nowcode.common;
+package com.yp.nowcode.utils;
+
+import com.yp.nowcode.common.BaseResponse;
+import com.yp.nowcode.common.ErrorCode;
 
 /**
  * 返回工具类
