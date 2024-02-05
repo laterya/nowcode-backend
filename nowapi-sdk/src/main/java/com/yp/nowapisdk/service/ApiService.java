@@ -4,7 +4,9 @@ import cn.hutool.http.HttpResponse;
 import com.yp.nowapisdk.client.NowApiClient;
 import com.yp.nowapisdk.exception.ApiException;
 import com.yp.nowapisdk.model.request.BaseRequest;
+import com.yp.nowapisdk.model.request.LoveRequest;
 import com.yp.nowapisdk.model.request.RandomWallpaperRequest;
+import com.yp.nowapisdk.model.response.LoveTalkResponse;
 import com.yp.nowapisdk.model.response.RandomWallpaperResponse;
 import com.yp.nowapisdk.model.response.ResultResponse;
 
@@ -48,4 +50,8 @@ public interface ApiService {
      * @throws ApiException 业务异常
      */
     RandomWallpaperResponse getRandomWallpaper(NowApiClient nowApiClient, RandomWallpaperRequest request) throws ApiException;
+
+    LoveTalkResponse getLoveTalk(LoveRequest loveRequest) throws ApiException;
+
+    LoveTalkResponse getLoveTalk(NowApiClient nowApiClient, LoveRequest loveRequest) throws ApiException;
 }

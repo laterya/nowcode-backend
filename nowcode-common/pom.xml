@@ -2,28 +2,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.yp</groupId>
+
+    <parent>
+        <groupId>com.yp</groupId>
+        <artifactId>nowcode-backend</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
     <artifactId>nowcode-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>nowcode-common</name>
     <description>nowcode-common</description>
-    <properties>
-        <java.version>1.8</java.version>
-    </properties>
+
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.2</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
