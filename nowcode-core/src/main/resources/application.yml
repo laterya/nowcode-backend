@@ -54,10 +54,10 @@ mybatis-plus:
 wx:
   # 微信公众平台
   mp:
-    token: xxx
-    aesKey: xxx
-    appId: xxx
-    secret: xxx
+    token: lateryazuishuai
+    aesKey: OxfN0Hts1UJrpsu7D7c9azXLmVAXHhnDrV2Eid0nJ0k
+    appId: wxa8596430adf4583e
+    secret: c97551375530dfa5fd603d41a299f673
     config-storage:
       http-client-type: HttpClient
       key-prefix: wx

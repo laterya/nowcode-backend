@@ -4,15 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yp.nowcode.annotation.AuthCheck;
 import com.yp.nowcode.annotation.RepeatSubmit;
-import com.yp.nowcode.common.BaseResponse;
-import com.yp.nowcode.common.DeleteRequest;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.utils.ResultUtils;
 import com.yp.nowcode.constant.ChartStatusConstant;
-import com.yp.nowcode.constant.CommonConstant;
 import com.yp.nowcode.constant.UserConstant;
-import com.yp.nowcode.exception.BusinessException;
-import com.yp.nowcode.exception.ThrowUtils;
+import com.yp.nowcodecommon.exception.BusinessException;
+import com.yp.nowcodecommon.exception.ThrowUtils;
 import com.yp.nowcode.manager.AiManager;
 import com.yp.nowcode.manager.RedisLimiterManager;
 import com.yp.nowcode.model.dto.chart.*;
@@ -25,6 +20,11 @@ import com.yp.nowcode.service.ChartService;
 import com.yp.nowcode.service.UserService;
 import com.yp.nowcode.utils.ExcelUtils;
 import com.yp.nowcode.utils.FileUtils;
+import com.yp.nowcodecommon.utils.ResultUtils;
+import com.yp.nowcodecommon.common.BaseResponse;
+import com.yp.nowcodecommon.common.DeleteRequest;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.constant.CommonConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -250,7 +250,7 @@ public class ChartController {
         LambdaQueryWrapper<Chart> lqw = new LambdaQueryWrapper<>(chart);
         Chart one = chartService.getOne(lqw, false);
         if (one != null) {
-            throw new BusinessException(ErrorCode.OPERATION_REPEAT_ERROR, "已有该查询噢");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "已有该查询噢");
         }
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();

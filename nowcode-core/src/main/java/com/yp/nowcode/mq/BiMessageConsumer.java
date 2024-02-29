@@ -5,15 +5,14 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
 import com.rabbitmq.client.Channel;
-import com.yp.nowcode.common.ErrorCode;
 import com.yp.nowcode.constant.BiMqConstant;
 import com.yp.nowcode.constant.ChartStatusConstant;
-import com.yp.nowcode.constant.CommonConstant;
-import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.manager.AiManager;
-import com.yp.nowcode.manager.WebSocketManager;
 import com.yp.nowcode.model.entity.Chart;
 import com.yp.nowcode.service.ChartService;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.constant.CommonConstant;
+import com.yp.nowcodecommon.exception.BusinessException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +34,6 @@ public class BiMessageConsumer {
     @Resource
     private AiManager aiManager;
 
-    @Resource
-    private WebSocketManager webSocketManager;
 
     // 指定程序监听的消息队列和确认机制
     @SneakyThrows
@@ -96,7 +93,6 @@ public class BiMessageConsumer {
             handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
         }
         // 消息确认，存在的问题是：请求ai返回过慢时，确认消息时通道已经关闭，导致消息确认失败
-        webSocketManager.sendOneMessage(chart.getUserId().toString(), "AI 生成成功");
         channel.basicAck(deliveryTag, false);
     }
 

@@ -2,19 +2,19 @@ package com.yp.nowcode.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yp.nowcode.annotation.AuthCheck;
-import com.yp.nowcode.common.BaseResponse;
-import com.yp.nowcode.common.DeleteRequest;
-import com.yp.nowcode.common.ErrorCode;
 import com.yp.nowcode.config.WxOpenConfig;
 import com.yp.nowcode.constant.UserConstant;
-import com.yp.nowcode.exception.BusinessException;
-import com.yp.nowcode.exception.ThrowUtils;
 import com.yp.nowcode.model.dto.user.*;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.model.vo.LoginUserVO;
 import com.yp.nowcode.model.vo.UserVO;
 import com.yp.nowcode.service.UserService;
-import com.yp.nowcode.utils.ResultUtils;
+import com.yp.nowcodecommon.common.BaseResponse;
+import com.yp.nowcodecommon.common.DeleteRequest;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
+import com.yp.nowcodecommon.exception.ThrowUtils;
+import com.yp.nowcodecommon.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
@@ -33,7 +33,6 @@ import static com.yp.nowcode.service.impl.UserServiceImpl.SALT;
 
 /**
  * 用户接口
- *
  */
 @RestController
 @RequestMapping("/user")
@@ -91,11 +90,11 @@ public class UserController {
     }
 
     /**
-     * 用户登录（微信开放平台）
+     * 用户登录（回调url） 网页授权，适合微信客户端
      */
     @GetMapping("/login/wx_open")
     public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam("code") String code) {
+                                                       @RequestParam("code") String code) {
         WxOAuth2AccessToken accessToken;
         try {
             WxMpService wxService = wxOpenConfig.getWxMpService();
@@ -112,6 +111,8 @@ public class UserController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
         }
     }
+
+    // todo 微信公众号发送验证码登陆
 
     /**
      * 用户注销
@@ -195,7 +196,7 @@ public class UserController {
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -248,7 +249,7 @@ public class UserController {
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+                                                   HttpServletRequest request) {
         long current = userQueryRequest.getCurrent();
         long size = userQueryRequest.getPageSize();
         Page<User> userPage = userService.page(new Page<>(current, size),
@@ -265,7 +266,7 @@ public class UserController {
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -292,7 +293,7 @@ public class UserController {
      */
     @PostMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
-            HttpServletRequest request) {
+                                              HttpServletRequest request) {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

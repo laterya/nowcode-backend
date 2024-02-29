@@ -1,7 +1,8 @@
-package com.yp.nowcode.common;
+package com.yp.nowcodecommon.common;
+
+import lombok.Data;
 
 import java.io.Serializable;
-import lombok.Data;
 
 /**
  * 删除请求

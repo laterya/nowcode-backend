@@ -1,4 +1,4 @@
-package com.yp.nowcode.common;
+package com.yp.nowcodecommon.common;
 
 import lombok.Data;
 

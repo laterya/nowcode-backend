@@ -1,5 +1,8 @@
-package com.yp.nowcodecommon.common;
+package com.yp.nowcodecommon.utils;
 
+
+import com.yp.nowcodecommon.common.BaseResponse;
+import com.yp.nowcodecommon.common.ErrorCode;
 
 public class ResultUtils {
 

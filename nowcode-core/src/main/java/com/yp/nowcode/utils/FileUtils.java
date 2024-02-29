@@ -1,9 +1,9 @@
 package com.yp.nowcode.utils;
 
 import cn.hutool.core.io.FileUtil;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.model.enums.FileUploadBizEnum;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;

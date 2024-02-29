@@ -1,7 +1,7 @@
 package com.yp.nowcode.manager;
 
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;
 import org.redisson.api.RateType;
@@ -27,7 +27,7 @@ public class RedisLimiterManager {
         // 每当一个操作来了后，请求一个令牌
         boolean canOp = rateLimiter.tryAcquire(1);
         if (!canOp) {
-            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "操作过于频繁，请稍后再试");
         }
     }
 }

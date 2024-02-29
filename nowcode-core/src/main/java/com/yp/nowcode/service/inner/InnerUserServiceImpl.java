@@ -1,10 +1,10 @@
 package com.yp.nowcode.service.inner;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.service.UserService;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
 import com.yp.nowcodecommon.model.vo.UserVO;
 import com.yp.nowcodecommon.service.inner.InnerUserService;
 import org.apache.commons.lang3.StringUtils;

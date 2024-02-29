@@ -1,6 +1,6 @@
-package com.yp.nowcode.exception;
+package com.yp.nowcodecommon.exception;
 
-import com.yp.nowcode.common.ErrorCode;
+import com.yp.nowcodecommon.common.ErrorCode;
 
 /**
  * 抛异常工具类

@@ -1,11 +1,11 @@
 package com.yp.nowcode.aop;
 
 import com.yp.nowcode.annotation.RepeatSubmit;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
+import com.yp.nowcodecommon.exception.BusinessException;
 import com.yp.nowcode.model.dto.chart.GenChartByAiRequest;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.service.UserService;
+import com.yp.nowcodecommon.common.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -22,7 +22,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
-
 @Slf4j
 @Component
 @Aspect
@@ -41,6 +40,7 @@ public class RepeatSubmitAspect {
     public void repeatSubmit() {
     }
 
+    // todo 智能检验特地接口是否重复
     @Around("repeatSubmit()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
@@ -62,7 +62,7 @@ public class RepeatSubmitAspect {
 
         Boolean b = redisTemplate.opsForValue().setIfAbsent(redisKey, redisKey, annotation.expireTime(), TimeUnit.SECONDS);
         if (Boolean.FALSE.equals(b)) {
-            throw new BusinessException(ErrorCode.OPERATION_REPEAT_ERROR, "请勿重复提交请求");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "请勿重复提交请求");
         }
         return joinPoint.proceed();
     }

@@ -1,7 +1,7 @@
 package com.yp.nowcode.manager;
 
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
 import com.yupi.yucongming.dev.client.YuCongMingClient;
 import com.yupi.yucongming.dev.common.BaseResponse;
 import com.yupi.yucongming.dev.model.DevChatRequest;

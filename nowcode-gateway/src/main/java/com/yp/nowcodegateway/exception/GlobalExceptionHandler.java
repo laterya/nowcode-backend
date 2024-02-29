@@ -4,7 +4,7 @@ package com.yp.nowcodegateway.exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yp.nowcodecommon.common.BaseResponse;
-import com.yp.nowcodecommon.common.ResultUtils;
+import com.yp.nowcodecommon.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

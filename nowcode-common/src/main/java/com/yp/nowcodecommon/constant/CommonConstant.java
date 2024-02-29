@@ -1,4 +1,4 @@
-package com.yp.nowcode.constant;
+package com.yp.nowcodecommon.constant;
 
 /**
  * 通用常量

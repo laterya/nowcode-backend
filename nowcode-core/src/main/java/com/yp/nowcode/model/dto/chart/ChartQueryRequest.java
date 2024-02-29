@@ -1,7 +1,7 @@
 package com.yp.nowcode.model.dto.chart;
 
 
-import com.yp.nowcode.common.PageRequest;
+import com.yp.nowcodecommon.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

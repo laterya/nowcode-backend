@@ -1,16 +1,16 @@
 package com.yp.nowcode.controller;
 
-import com.yp.nowcode.common.BaseResponse;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.utils.ResultUtils;
 import com.yp.nowcode.constant.FileConstant;
-import com.yp.nowcode.exception.BusinessException;
 import com.yp.nowcode.manager.CosManager;
 import com.yp.nowcode.model.dto.file.UploadFileRequest;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.model.enums.FileUploadBizEnum;
 import com.yp.nowcode.service.UserService;
 import com.yp.nowcode.utils.FileUtils;
+import com.yp.nowcodecommon.common.BaseResponse;
+import com.yp.nowcodecommon.common.ErrorCode;
+import com.yp.nowcodecommon.exception.BusinessException;
+import com.yp.nowcodecommon.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.PostMapping;

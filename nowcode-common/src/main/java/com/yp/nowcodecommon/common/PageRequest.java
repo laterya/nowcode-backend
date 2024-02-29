@@ -1,6 +1,6 @@
-package com.yp.nowcode.common;
+package com.yp.nowcodecommon.common;
 
-import com.yp.nowcode.constant.CommonConstant;
+import com.yp.nowcodecommon.constant.CommonConstant;
 import lombok.Data;
 
 /**

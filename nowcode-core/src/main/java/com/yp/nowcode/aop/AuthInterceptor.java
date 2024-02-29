@@ -1,11 +1,11 @@
 package com.yp.nowcode.aop;
 
 import com.yp.nowcode.annotation.AuthCheck;
-import com.yp.nowcode.common.ErrorCode;
-import com.yp.nowcode.exception.BusinessException;
+import com.yp.nowcodecommon.exception.BusinessException;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.model.enums.UserRoleEnum;
 import com.yp.nowcode.service.UserService;
+import com.yp.nowcodecommon.common.ErrorCode;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

@@ -1,6 +1,6 @@
 package com.yp.nowcode.model.dto.user;
 
-import com.yp.nowcode.common.PageRequest;
+import com.yp.nowcodecommon.common.PageRequest;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
