@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  * 用户服务
- *
  */
 public interface UserService extends IService<User> {
 
@@ -26,6 +25,8 @@ public interface UserService extends IService<User> {
      * @return 新用户 id
      */
     long userRegister(String userAccount, String userPassword, String checkPassword);
+
+    void user3rdRegister(String userAccount, String userName, String avatar, String email, String password);
 
     /**
      * 是游客
@@ -127,4 +128,6 @@ public interface UserService extends IService<User> {
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
     boolean reduceWalletBalance(Long userId, Integer reduceScore);
+
+    boolean checkUserExist(String userAccount);
 }

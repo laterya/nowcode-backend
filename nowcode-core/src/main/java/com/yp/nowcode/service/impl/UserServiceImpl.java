@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestAlgorithm;
 import cn.hutool.crypto.digest.Digester;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -85,6 +86,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             return user.getId();
         }
+    }
+
+    @Override
+    public void user3rdRegister(String userAccount, String userName, String avatar, String email, String password) {
+        long userId = this.userRegister(userAccount, password, password);
+        User user = this.getById(userId);
+        user.setUserName(userName);
+        user.setUserAvatar(avatar);
+        user.setUserEmail(email);
+        this.updateById(user);
     }
 
     @Override
@@ -295,5 +306,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userLambdaUpdateWrapper.eq(User::getId, userId);
         userLambdaUpdateWrapper.setSql("balance = balance - " + reduceScore);
         return this.update(userLambdaUpdateWrapper);
+    }
+
+    @Override
+    public boolean checkUserExist(String userAccount) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUserAccount, userAccount);
+        return this.baseMapper.selectCount(queryWrapper) > 0;
     }
 }

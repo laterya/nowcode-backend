@@ -1,6 +1,7 @@
 package com.yp.nowcode.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yp.nowcode.adapter.Login3rdGiteeAdapter;
 import com.yp.nowcode.annotation.AuthCheck;
 import com.yp.nowcode.config.WxOpenConfig;
 import com.yp.nowcode.constant.UserConstant;
@@ -45,7 +46,15 @@ public class UserController {
     @Resource
     private WxOpenConfig wxOpenConfig;
 
+    @Resource
+    private Login3rdGiteeAdapter login3rdGiteeAdapter;
+
     // region 登录相关
+    @GetMapping("/gitee")
+    public BaseResponse<LoginUserVO> gitee(String code, String state) {
+        LoginUserVO loginUserVO = login3rdGiteeAdapter.loginByGitee(code, state);
+        return ResultUtils.success(loginUserVO);
+    }
 
     /**
      * 用户注册
