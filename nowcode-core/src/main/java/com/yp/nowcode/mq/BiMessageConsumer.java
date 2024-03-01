@@ -1,9 +1,6 @@
 package com.yp.nowcode.mq;
 
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
+import com.github.rholder.retry.*;
 import com.rabbitmq.client.Channel;
 import com.yp.nowcode.constant.BiMqConstant;
 import com.yp.nowcode.constant.ChartStatusConstant;
@@ -13,7 +10,6 @@ import com.yp.nowcode.service.ChartService;
 import com.yp.nowcodecommon.common.ErrorCode;
 import com.yp.nowcodecommon.constant.CommonConstant;
 import com.yp.nowcodecommon.exception.BusinessException;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -22,6 +18,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -36,9 +34,8 @@ public class BiMessageConsumer {
 
 
     // 指定程序监听的消息队列和确认机制
-    @SneakyThrows
     @RabbitListener(queues = {BiMqConstant.BI_QUEUE_NAME}, ackMode = "MANUAL")
-    public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
+    public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
         log.info("receiveMessage message = {}", message);
         if (StringUtils.isBlank(message)) {
             // 如果失败，消息拒绝
@@ -51,11 +48,6 @@ public class BiMessageConsumer {
             channel.basicNack(deliveryTag, false, false);
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "图表为空");
         }
-        // 如果已经生成，直接ack
-        if (chart.getStatus().equals(ChartStatusConstant.GEN_SUCCEED)) {
-//            channel.basicAck(deliveryTag, false);
-            channel.basicNack(deliveryTag, false, false);
-        }
         // 先修改图表任务状态为 “执行中”。等执行成功后，修改为 “已完成”、保存执行结果；执行失败后，状态修改为 “失败”，记录任务失败信息。
         Chart updateChart = new Chart();
         updateChart.setId(chart.getId());
@@ -66,34 +58,42 @@ public class BiMessageConsumer {
             handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
             return;
         }
-        // 调用 AI
-        String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, buildUserInput(chart));
-        String[] splits = result.split("【【【【【");
-        if (splits.length < 3) {
-            channel.basicNack(deliveryTag, false, true);
-            handleChartUpdateError(chart.getId(), "AI 生成错误");
-            return;
-        }
-        String genChart = splits[1].trim();
-        String genResult = splits[2].trim();
-        Chart updateChartResult = new Chart();
-        updateChartResult.setId(chart.getId());
-        updateChartResult.setGenChart(genChart);
-        updateChartResult.setGenResult(genResult);
-        updateChartResult.setStatus(ChartStatusConstant.GEN_SUCCEED);
+        channel.basicAck(deliveryTag, false);
+
         Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                .retryIfException()
                 .retryIfResult(res -> !res)  //设置根据结果重试
                 .withWaitStrategy(WaitStrategies.fixedWait(3, TimeUnit.SECONDS)) //设置等待间隔时间
                 .withStopStrategy(StopStrategies.stopAfterAttempt(3)) //设置最大重试次数
                 .build();
+
         try {
-            retryer.call(() -> chartService.updateById(updateChartResult));
-        } catch (Exception e) {
-            channel.basicNack(deliveryTag, false, false);
-            handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
+            retryer.call(() -> extracted(chart));
+        } catch (ExecutionException | RetryException e) {
+            log.info("retryer error", e);
         }
-        // 消息确认，存在的问题是：请求ai返回过慢时，确认消息时通道已经关闭，导致消息确认失败
-        channel.basicAck(deliveryTag, false);
+    }
+
+
+    private boolean extracted(Chart chart) {
+        try {
+            String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, buildUserInput(chart));
+            String[] splits = result.split("【【【【【");
+            if (splits.length < 3) {
+                handleChartUpdateError(chart.getId(), "AI 生成错误");
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
+            }
+            String genChart = splits[1].trim();
+            String genResult = splits[2].trim();
+            Chart updateChartResult = new Chart();
+            updateChartResult.setId(chart.getId());
+            updateChartResult.setGenChart(genChart);
+            updateChartResult.setGenResult(genResult);
+            updateChartResult.setStatus(ChartStatusConstant.GEN_SUCCEED);
+            return true;
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
+        }
     }
 
     /**

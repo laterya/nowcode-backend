@@ -4,6 +4,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.yp.nowcode.constant.BiMqConstant;
+import com.yp.nowcode.utils.SpringContextUtils;
 import com.yp.nowcodecommon.common.ErrorCode;
 import com.yp.nowcodecommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -30,7 +32,8 @@ import java.util.concurrent.TimeoutException;
 public class MainApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MainApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(MainApplication.class, args);
+        String[] allBeansNames = SpringContextUtils.getAllBeansNames();
     }
 
     @PostConstruct

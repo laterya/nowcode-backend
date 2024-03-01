@@ -5,10 +5,10 @@ import com.yp.nowapisdk.client.NowApiClient;
 import com.yp.nowapisdk.exception.ApiException;
 import com.yp.nowapisdk.model.request.BaseRequest;
 import com.yp.nowapisdk.model.request.LoveRequest;
-import com.yp.nowapisdk.model.request.RandomWallpaperRequest;
+import com.yp.nowapisdk.model.request.ShortLinkRequest;
 import com.yp.nowapisdk.model.response.LoveTalkResponse;
-import com.yp.nowapisdk.model.response.RandomWallpaperResponse;
 import com.yp.nowapisdk.model.response.ResultResponse;
+import com.yp.nowapisdk.model.response.ShortLinkResponse;
 
 
 public interface ApiService {
@@ -19,7 +19,6 @@ public interface ApiService {
      * @return {@link HttpResponse}
      * @throws ApiException 业务异常
      */
-
     <O, T extends ResultResponse> T request(BaseRequest<O, T> request) throws ApiException;
 
     /**
@@ -32,26 +31,11 @@ public interface ApiService {
      */
     <O, T extends ResultResponse> T request(NowApiClient nowApiClient, BaseRequest<O, T> request) throws ApiException;
 
-    /**
-     * 获取随机壁纸
-     *
-     * @param request 要求
-     * @return {@link RandomWallpaperResponse}
-     * @throws ApiException 业务异常
-     */
-    RandomWallpaperResponse getRandomWallpaper(RandomWallpaperRequest request) throws ApiException;
-
-    /**
-     * 获取随机壁纸
-     *
-     * @param nowApiClient qi api客户端
-     * @param request      要求
-     * @return {@link RandomWallpaperResponse}
-     * @throws ApiException 业务异常
-     */
-    RandomWallpaperResponse getRandomWallpaper(NowApiClient nowApiClient, RandomWallpaperRequest request) throws ApiException;
-
     LoveTalkResponse getLoveTalk(LoveRequest loveRequest) throws ApiException;
 
     LoveTalkResponse getLoveTalk(NowApiClient nowApiClient, LoveRequest loveRequest) throws ApiException;
+
+    ShortLinkResponse getShortLink(ShortLinkRequest shortLinkRequest) throws ApiException;
+
+    ShortLinkResponse getShortLink(NowApiClient nowApiClient, ShortLinkRequest shortLinkRequest) throws ApiException;
 }

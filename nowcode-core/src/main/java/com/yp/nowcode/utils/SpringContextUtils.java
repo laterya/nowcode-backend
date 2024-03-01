@@ -6,9 +6,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 /**
  * Spring 上下文获取工具
- *
  */
 @Component
 public class SpringContextUtils implements ApplicationContextAware {
@@ -51,5 +52,11 @@ public class SpringContextUtils implements ApplicationContextAware {
      */
     public static <T> T getBean(String beanName, Class<T> beanClass) {
         return applicationContext.getBean(beanName, beanClass);
+    }
+
+    public static String[] getAllBeansNames() {
+        String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
+        Arrays.sort(beanDefinitionNames);
+        return beanDefinitionNames;
     }
 }

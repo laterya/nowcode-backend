@@ -31,12 +31,27 @@ public abstract class BaseService implements ApiService {
     /**
      * 网关HOST
      */
-    private String gatewayHost = "http://localhost:8090/api";
+    private final String gatewayHost = "http://localhost:8090/api";
+
+    @Override
+    public <O, T extends ResultResponse> T request(BaseRequest<O, T> request) throws ApiException {
+        try {
+            return res(request);
+        } catch (Exception e) {
+            throw new ApiException(ErrorCode.OPERATION_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public <O, T extends ResultResponse> T request(NowApiClient nowApiClient, BaseRequest<O, T> request) throws ApiException {
+        checkConfig(nowApiClient);
+        return request(request);
+    }
 
     /**
      * 检查配置
      *
-     * @param nowApiClient qi api客户端
+     * @param nowApiClient api客户端
      * @throws ApiException 业务异常
      */
     public void checkConfig(NowApiClient nowApiClient) throws ApiException {
@@ -46,6 +61,45 @@ public abstract class BaseService implements ApiService {
         if (nowApiClient != null && !StringUtils.isAnyBlank(nowApiClient.getAccessKey(), nowApiClient.getSecretKey())) {
             this.setNowApiClient(nowApiClient);
         }
+    }
+
+    /**
+     * 获取响应数据
+     *
+     * @param request 要求
+     * @return {@link T}
+     * @throws ApiException 业务异常
+     */
+    public <O, T extends ResultResponse> T res(BaseRequest<O, T> request) throws ApiException {
+        if (nowApiClient == null || StringUtils.isAnyBlank(nowApiClient.getAccessKey(), nowApiClient.getSecretKey())) {
+            throw new ApiException(ErrorCode.NO_AUTH_ERROR, "请先配置密钥AccessKey/SecretKey");
+        }
+        T rsp;
+        try {
+            Class<T> clazz = request.getResponseClass();
+            rsp = clazz.newInstance();
+        } catch (Exception e) {
+            throw new ApiException(ErrorCode.OPERATION_ERROR, e.getMessage());
+        }
+        HttpResponse httpResponse = doRequest(request);
+        String body = httpResponse.body();
+        Map<String, Object> data = new HashMap<>();
+        if (httpResponse.getStatus() != 200) {
+            ErrorResponse errorResponse = JSONUtil.toBean(body, ErrorResponse.class);
+            data.put("errorMessage", errorResponse.getMessage());
+            data.put("code", errorResponse.getCode());
+        } else {
+            try {
+                // 尝试解析为JSON对象
+                data = new Gson().fromJson(body, new TypeToken<Map<String, Object>>() {
+                }.getType());
+            } catch (JsonSyntaxException e) {
+                // 解析失败，将body作为普通字符串处理
+                data.put("value", body);
+            }
+        }
+        rsp.setData(data);
+        return rsp;
     }
 
     /**
@@ -106,45 +160,6 @@ public abstract class BaseService implements ApiService {
     }
 
     /**
-     * 获取响应数据
-     *
-     * @param request 要求
-     * @return {@link T}
-     * @throws ApiException 业务异常
-     */
-    public <O, T extends ResultResponse> T res(BaseRequest<O, T> request) throws ApiException {
-        if (nowApiClient == null || StringUtils.isAnyBlank(nowApiClient.getAccessKey(), nowApiClient.getSecretKey())) {
-            throw new ApiException(ErrorCode.NO_AUTH_ERROR, "请先配置密钥AccessKey/SecretKey");
-        }
-        T rsp;
-        try {
-            Class<T> clazz = request.getResponseClass();
-            rsp = clazz.newInstance();
-        } catch (Exception e) {
-            throw new ApiException(ErrorCode.OPERATION_ERROR, e.getMessage());
-        }
-        HttpResponse httpResponse = doRequest(request);
-        String body = httpResponse.body();
-        Map<String, Object> data = new HashMap<>();
-        if (httpResponse.getStatus() != 200) {
-            ErrorResponse errorResponse = JSONUtil.toBean(body, ErrorResponse.class);
-            data.put("errorMessage", errorResponse.getMessage());
-            data.put("code", errorResponse.getCode());
-        } else {
-            try {
-                // 尝试解析为JSON对象
-                data = new Gson().fromJson(body, new TypeToken<Map<String, Object>>() {
-                }.getType());
-            } catch (JsonSyntaxException e) {
-                // 解析失败，将body作为普通字符串处理
-                data.put("value", body);
-            }
-        }
-        rsp.setData(data);
-        return rsp;
-    }
-
-    /**
      * 拼接Get请求
      *
      * @param request 要求
@@ -187,20 +202,5 @@ public abstract class BaseService implements ApiService {
         hashMap.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
         hashMap.put("sign", SignUtils.getSign(encodedBody, nowApiClient.getSecretKey()));
         return hashMap;
-    }
-
-    @Override
-    public <O, T extends ResultResponse> T request(BaseRequest<O, T> request) throws ApiException {
-        try {
-            return res(request);
-        } catch (Exception e) {
-            throw new ApiException(ErrorCode.OPERATION_ERROR, e.getMessage());
-        }
-    }
-
-    @Override
-    public <O, T extends ResultResponse> T request(NowApiClient nowApiClient, BaseRequest<O, T> request) throws ApiException {
-        checkConfig(nowApiClient);
-        return request(request);
     }
 }

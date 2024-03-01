@@ -53,6 +53,12 @@
         <dependency>
             <groupId>com.yp</groupId>
             <artifactId>nowcode-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.yp</groupId>

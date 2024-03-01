@@ -3,11 +3,7 @@ package com.yp.nowcode.retry;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
 import org.junit.jupiter.api.Test;
-import org.springframework.remoting.RemoteAccessException;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author yp
@@ -15,21 +11,50 @@ import java.util.concurrent.TimeUnit;
  */
 class GuavaRetryTest {
 
+
+    private int invokeCount = 0;
+
+    public int realAction(int num) {
+        invokeCount++;
+        System.out.println(String.format("当前执行第 %d 次,num:%d", invokeCount, num));
+        if (num <= 0) {
+            throw new IllegalArgumentException();
+        }
+        return num;
+    }
+
     @Test
-    public void fun01() {
-        // RetryerBuilder 构建重试实例 retryer,可以设置重试源且可以支持多个重试源，可以配置重试次数或重试超时时间，以及可以配置等待时间间隔
-        Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-                .retryIfExceptionOfType(RemoteAccessException.class)//设置异常重试源
-                .retryIfResult(res -> res == false)  //设置根据结果重试
-                .withWaitStrategy(WaitStrategies.fixedWait(3, TimeUnit.SECONDS)) //设置等待间隔时间
-                .withStopStrategy(StopStrategies.stopAfterAttempt(3)) //设置最大重试次数
-                .build();
+    public void guavaRetryTest001() {
+        Retryer<Integer> retryer = RetryerBuilder.<Integer>newBuilder()
+                .withRetryListener(new MyRetryingListener())
+                // 非正数进行重试
+                .retryIfRuntimeException()
+                // 偶数则进行重试
+                .retryIfResult(result -> result % 2 == 0)
+                // 设置最大执行次数3次
+                .withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
 
         try {
-            retryer.call(() -> RetryDemoTask.retryTask("abc"));
+            invokeCount = 0;
+            retryer.call(() -> realAction(0));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("执行0，异常：" + e.getMessage());
+        }
+
+        try {
+            invokeCount = 0;
+            retryer.call(() -> realAction(1));
+        } catch (Exception e) {
+            System.out.println("执行1，异常：" + e.getMessage());
+        }
+
+        try {
+            invokeCount = 0;
+            retryer.call(() -> realAction(2));
+        } catch (Exception e) {
+            System.out.println("执行2，异常：" + e.getMessage());
         }
     }
+
 
 }

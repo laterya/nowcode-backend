@@ -5,7 +5,10 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RandomWallpaperResponse extends ResultResponse {
+public class ShortLinkResponse extends ResultResponse {
     private static final long serialVersionUID = -6467312483425078539L;
-    private String imgurl;
+
+    private String shortLinkUrl;
+
+    private String msg;
 }
