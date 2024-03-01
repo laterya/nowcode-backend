@@ -104,4 +104,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 
-nowcode-core/src/main/resources/dev/
+nowcode-core/src/main/resources/dev/settings.properties

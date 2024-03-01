@@ -314,4 +314,12 @@ public class UserController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+    @PostMapping("/daily")
+    public BaseResponse<Boolean> dailyCheck(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        boolean result = userService.dailyCheck(loginUser.getId());
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
 }

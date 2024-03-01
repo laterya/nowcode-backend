@@ -26,7 +26,7 @@ public class RedissonConfig {
     private String password;
 
     @Bean
-    public RedissonClient redisClient() {
+    public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer().setDatabase(database).setAddress("redis://" + host + ":" + port);
         return Redisson.create(config);

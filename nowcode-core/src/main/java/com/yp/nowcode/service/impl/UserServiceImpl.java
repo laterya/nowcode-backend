@@ -22,11 +22,16 @@ import com.yp.nowcodecommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBitSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +49,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     public static final String SALT = "yp";
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -309,9 +317,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public boolean addWalletBalance(Long userId, Integer addPoints) {
+        LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        userLambdaUpdateWrapper.eq(User::getId, userId);
+        userLambdaUpdateWrapper.setSql("balance = balance + " + addPoints);
+        return this.update(userLambdaUpdateWrapper);
+    }
+
+    @Override
     public boolean checkUserExist(String userAccount) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getUserAccount, userAccount);
         return this.baseMapper.selectCount(queryWrapper) > 0;
+    }
+
+    @Override
+    public boolean dailyCheck(Long id) {
+        LocalDateTime now = LocalDateTime.now();
+        String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
+        String key = "sign:" + id + keySuffix;
+        int dayOfMonth = now.getDayOfMonth();
+        RBitSet bitSet = redissonClient.getBitSet(key);
+        if (bitSet.get(dayOfMonth - 1)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "今日已签到");
+        }
+        // todo 加锁
+        bitSet.set(dayOfMonth - 1, 1);
+        return this.addWalletBalance(id, 10);
     }
 }

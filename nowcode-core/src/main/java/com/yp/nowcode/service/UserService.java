@@ -129,5 +129,9 @@ public interface UserService extends IService<User> {
 
     boolean reduceWalletBalance(Long userId, Integer reduceScore);
 
+    boolean addWalletBalance(Long userId, Integer addPoints);
+
     boolean checkUserExist(String userAccount);
+
+    boolean dailyCheck(Long id);
 }
