@@ -8,7 +8,6 @@ import com.yp.nowcode.manager.AiManager;
 import com.yp.nowcode.model.entity.Chart;
 import com.yp.nowcode.service.ChartService;
 import com.yp.nowcodecommon.common.ErrorCode;
-import com.yp.nowcodecommon.constant.CommonConstant;
 import com.yp.nowcodecommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +69,7 @@ public class BiMessageConsumer {
         try {
             retryer.call(() -> extracted(chart));
         } catch (ExecutionException | RetryException e) {
+            handleChartUpdateError(chart.getId(), "AI 生成失败");
             log.info("retryer error", e);
         }
     }
@@ -77,7 +77,7 @@ public class BiMessageConsumer {
 
     private boolean extracted(Chart chart) {
         try {
-            String result = aiManager.doChat(CommonConstant.BI_MODEL_ID, buildUserInput(chart));
+            String result = aiManager.doChatUseXf(chart.getGoal(), chart.getChartData());
             String[] splits = result.split("【【【【【");
             if (splits.length < 3) {
                 handleChartUpdateError(chart.getId(), "AI 生成错误");
@@ -90,36 +90,10 @@ public class BiMessageConsumer {
             updateChartResult.setGenChart(genChart);
             updateChartResult.setGenResult(genResult);
             updateChartResult.setStatus(ChartStatusConstant.GEN_SUCCEED);
-            return true;
+            return chartService.updateById(updateChartResult);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
         }
-    }
-
-    /**
-     * 构建用户输入
-     *
-     * @param chart
-     * @return
-     */
-    private String buildUserInput(Chart chart) {
-        String goal = chart.getGoal();
-        String chartType = chart.getChartType();
-        String csvData = chart.getChartData();
-
-        // 构造用户输入
-        StringBuilder userInput = new StringBuilder();
-        userInput.append("分析需求：").append("\n");
-
-        // 拼接分析目标
-        String userGoal = goal;
-        if (StringUtils.isNotBlank(chartType)) {
-            userGoal += "，请使用" + chartType;
-        }
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
-        userInput.append(csvData).append("\n");
-        return userInput.toString();
     }
 
     private void handleChartUpdateError(long chartId, String execMessage) {

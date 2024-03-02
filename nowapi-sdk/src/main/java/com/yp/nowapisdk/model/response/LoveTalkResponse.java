@@ -7,5 +7,4 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class LoveTalkResponse extends ResultResponse {
     private static final long serialVersionUID = -6467312483425078539L;
-    private String imgurl;
 }

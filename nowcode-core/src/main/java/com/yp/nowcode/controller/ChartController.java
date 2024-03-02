@@ -6,8 +6,6 @@ import com.yp.nowcode.annotation.AuthCheck;
 import com.yp.nowcode.annotation.RepeatSubmit;
 import com.yp.nowcode.constant.ChartStatusConstant;
 import com.yp.nowcode.constant.UserConstant;
-import com.yp.nowcodecommon.exception.BusinessException;
-import com.yp.nowcodecommon.exception.ThrowUtils;
 import com.yp.nowcode.manager.AiManager;
 import com.yp.nowcode.manager.RedisLimiterManager;
 import com.yp.nowcode.model.dto.chart.*;
@@ -20,11 +18,13 @@ import com.yp.nowcode.service.ChartService;
 import com.yp.nowcode.service.UserService;
 import com.yp.nowcode.utils.ExcelUtils;
 import com.yp.nowcode.utils.FileUtils;
-import com.yp.nowcodecommon.utils.ResultUtils;
 import com.yp.nowcodecommon.common.BaseResponse;
 import com.yp.nowcodecommon.common.DeleteRequest;
 import com.yp.nowcodecommon.common.ErrorCode;
 import com.yp.nowcodecommon.constant.CommonConstant;
+import com.yp.nowcodecommon.exception.BusinessException;
+import com.yp.nowcodecommon.exception.ThrowUtils;
+import com.yp.nowcodecommon.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -252,17 +252,8 @@ public class ChartController {
         if (one != null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "已有该查询噢");
         }
-        // 构造用户输入
-        StringBuilder userInput = new StringBuilder();
-        userInput.append("分析需求：").append("\n");
-        String userGoal = goal;
-        if (StringUtils.isNotBlank(chartType)) {
-            userGoal += "，请使用" + chartType;
-        }
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
+
         String csvData = ExcelUtils.excelToCsv(multipartFile);
-        userInput.append(csvData).append("\n");
 
         chart.setChartData(csvData);
         chart.setStatus(ChartStatusConstant.GEN_COMMIT);
@@ -280,12 +271,6 @@ public class ChartController {
     @PostMapping("/gen")
     @Deprecated
     public BaseResponse<BiResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile, GenChartByAiRequest genChartByAiRequest, HttpServletRequest request) {
-//        Chart byId = chartService.getById(1750381895221284866l);
-//        BiResponse biResponse = new BiResponse();
-//        biResponse.setGenChart(byId.getGenChart());
-//        biResponse.setGenResult(byId.getGenResult());
-//        biResponse.setChartId(byId.getId());
-//        return ResultUtils.success(biResponse);
         String name = genChartByAiRequest.getName();
         String goal = genChartByAiRequest.getGoal();
         String chartType = genChartByAiRequest.getChartType();
@@ -298,22 +283,11 @@ public class ChartController {
         // 限流操作
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
         long biModelId = CommonConstant.BI_MODEL_ID;
-        // 构造用户输入
-        StringBuilder userInput = new StringBuilder();
-        userInput.append("分析需求：").append("\n");
 
-        // 拼接分析目标
-        String userGoal = goal;
-        if (StringUtils.isNotBlank(chartType)) {
-            userGoal += "，请使用" + chartType;
-        }
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
         // 压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
-        userInput.append(csvData).append("\n");
 
-        String result = aiManager.doChat(biModelId, userInput.toString());
+        String result = aiManager.doChatUseXf(goal, csvData);
         String[] splits = result.split("【【【【【");
         if (splits.length < 3) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
@@ -363,18 +337,7 @@ public class ChartController {
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
         long biModelId = 1659171950288818178L;
 
-
-        // 构造用户输入
-        StringBuilder userInput = new StringBuilder();
-        userInput.append("分析需求：").append("\n");
-        String userGoal = goal;
-        if (StringUtils.isNotBlank(chartType)) {
-            userGoal += "，请使用" + chartType;
-        }
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
         String csvData = ExcelUtils.excelToCsv(multipartFile);
-        userInput.append(csvData).append("\n");
 
         // 插入到数据库
         Chart chart = new Chart();
@@ -399,7 +362,7 @@ public class ChartController {
                 return;
             }
             // 调用 AI
-            String result = aiManager.doChat(biModelId, userInput.toString());
+            String result = aiManager.doChatUseXf(goal, csvData);
             String[] splits = result.split("【【【【【");
             if (splits.length < 3) {
                 handleChartUpdateError(chart.getId(), "AI 生成错误");

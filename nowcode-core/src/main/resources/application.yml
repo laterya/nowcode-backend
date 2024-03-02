@@ -96,3 +96,9 @@ dubbo:
   registry:
     id: nacos-register
     address: nacos://localhost:8848
+# 讯飞的配置
+xf:
+  api-key: xxxxxxxxxx
+  appid: xxxxxxxx
+  api-secret: xxxxxxxxxx
+  xf-version: vthreepoint
