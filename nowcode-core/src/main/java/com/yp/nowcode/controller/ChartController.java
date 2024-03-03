@@ -287,13 +287,14 @@ public class ChartController {
         // 压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
 
-        String result = aiManager.doChatUseXf(goal, csvData);
-        String[] splits = result.split("【【【【【");
-        if (splits.length < 3) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
+        StringBuilder userGoal = new StringBuilder();
+        if (StringUtils.isNotBlank(userGoal)) {
+            userGoal.append(goal).append("，请使用").append(chartType);
         }
-        String genChart = splits[1].trim();
-        String genResult = splits[2].trim();
+        String result = aiManager.doChatUseXf(userGoal.toString(), csvData);
+        String[] strings = chartService.handleAiRet(result);
+        String genChart = strings[0];
+        String genResult = strings[1];
         // 插入到数据库
         Chart chart = new Chart();
         chart.setName(name);
@@ -362,14 +363,14 @@ public class ChartController {
                 return;
             }
             // 调用 AI
-            String result = aiManager.doChatUseXf(goal, csvData);
-            String[] splits = result.split("【【【【【");
-            if (splits.length < 3) {
-                handleChartUpdateError(chart.getId(), "AI 生成错误");
-                return;
+            StringBuilder userGoal = new StringBuilder();
+            if (StringUtils.isNotBlank(userGoal)) {
+                userGoal.append(goal).append("，请使用").append(chartType);
             }
-            String genChart = splits[1].trim();
-            String genResult = splits[2].trim();
+            String result = aiManager.doChatUseXf(userGoal.toString(), csvData);
+            String[] strings = chartService.handleAiRet(result);
+            String genChart = strings[0];
+            String genResult = strings[1];
             Chart updateChartResult = new Chart();
             updateChartResult.setId(chart.getId());
             updateChartResult.setGenChart(genChart);

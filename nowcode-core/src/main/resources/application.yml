@@ -98,7 +98,7 @@ dubbo:
     address: nacos://localhost:8848
 # 讯飞的配置
 xf:
-  api-key: xxxxxxxxxx
-  appid: xxxxxxxx
-  api-secret: xxxxxxxxxx
+  api-key: 13fa434990fc15d57c0f88f2a9ef16ca
+  appid: a10b3d1b
+  api-secret: YmRmOTI2NGZkNWUzNmYxZWQ1ZDU3M2Jm
   xf-version: vthreepoint

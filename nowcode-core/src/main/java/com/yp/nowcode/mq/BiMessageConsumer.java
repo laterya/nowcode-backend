@@ -78,13 +78,9 @@ public class BiMessageConsumer {
     private boolean extracted(Chart chart) {
         try {
             String result = aiManager.doChatUseXf(chart.getGoal(), chart.getChartData());
-            String[] splits = result.split("【【【【【");
-            if (splits.length < 3) {
-                handleChartUpdateError(chart.getId(), "AI 生成错误");
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误");
-            }
-            String genChart = splits[1].trim();
-            String genResult = splits[2].trim();
+            String[] strings = chartService.handleAiRet(result);
+            String genChart = strings[0];
+            String genResult = strings[1];
             Chart updateChartResult = new Chart();
             updateChartResult.setId(chart.getId());
             updateChartResult.setGenChart(genChart);

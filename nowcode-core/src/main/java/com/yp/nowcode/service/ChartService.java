@@ -12,4 +12,6 @@ import com.yp.nowcode.model.entity.Chart;
 public interface ChartService extends IService<Chart> {
 
     Wrapper<Chart> getQueryWrapper(ChartQueryRequest chartQueryRequest);
+
+    String[] handleAiRet(String aiRet);
 }
