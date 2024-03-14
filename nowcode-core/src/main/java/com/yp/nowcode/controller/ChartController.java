@@ -2,13 +2,13 @@ package com.yp.nowcode.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yp.nowcode.annotation.AuthCheck;
 import com.yp.nowcode.annotation.RepeatSubmit;
 import com.yp.nowcode.constant.ChartStatusConstant;
-import com.yp.nowcode.constant.UserConstant;
 import com.yp.nowcode.manager.AiManager;
 import com.yp.nowcode.manager.RedisLimiterManager;
-import com.yp.nowcode.model.dto.chart.*;
+import com.yp.nowcode.model.dto.chart.ChartEditRequest;
+import com.yp.nowcode.model.dto.chart.ChartQueryRequest;
+import com.yp.nowcode.model.dto.chart.GenChartByAiRequest;
 import com.yp.nowcode.model.entity.Chart;
 import com.yp.nowcode.model.entity.User;
 import com.yp.nowcode.model.enums.FileUploadBizEnum;
@@ -63,29 +63,6 @@ public class ChartController {
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
 
-    // region 增删改查
-
-    /**
-     * 创建
-     *
-     * @param chartAddRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/add")
-    public BaseResponse<Long> addChart(@RequestBody ChartAddRequest chartAddRequest, HttpServletRequest request) {
-        if (chartAddRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        Chart chart = new Chart();
-        BeanUtils.copyProperties(chartAddRequest, chart);
-        User loginUser = userService.getLoginUser(request);
-        chart.setUserId(loginUser.getId());
-        boolean result = chartService.save(chart);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        long newChartId = chart.getId();
-        return ResultUtils.success(newChartId);
-    }
 
     /**
      * 删除
@@ -113,28 +90,6 @@ public class ChartController {
     }
 
     /**
-     * 更新（仅管理员）
-     *
-     * @param chartUpdateRequest
-     * @return
-     */
-    @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateChart(@RequestBody ChartUpdateRequest chartUpdateRequest) {
-        if (chartUpdateRequest == null || chartUpdateRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        Chart chart = new Chart();
-        BeanUtils.copyProperties(chartUpdateRequest, chart);
-        long id = chartUpdateRequest.getId();
-        // 判断是否存在
-        Chart oldChart = chartService.getById(id);
-        ThrowUtils.throwIf(oldChart == null, ErrorCode.NOT_FOUND_ERROR);
-        boolean result = chartService.updateById(chart);
-        return ResultUtils.success(result);
-    }
-
-    /**
      * 根据 id 获取
      *
      * @param id
@@ -150,25 +105,6 @@ public class ChartController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         return ResultUtils.success(chart);
-    }
-
-    /**
-     * 分页获取列表（封装类）
-     *
-     * @param chartQueryRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/list/page")
-    public BaseResponse<Page<Chart>> listChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                     HttpServletRequest request) {
-        long current = chartQueryRequest.getCurrent();
-        long size = chartQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Chart> chartPage = chartService.page(new Page<>(current, size),
-                chartService.getQueryWrapper(chartQueryRequest));
-        return ResultUtils.success(chartPage);
     }
 
     /**
@@ -195,7 +131,6 @@ public class ChartController {
         return ResultUtils.success(chartPage);
     }
 
-    // endregion
 
     /**
      * 编辑（用户）
@@ -240,7 +175,6 @@ public class ChartController {
         // 限流操作
         redisLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
 
-        // todo 检测文件是否也一致
         Chart chart = new Chart();
         chart.setName(name);
         chart.setGoal(goal);
@@ -261,7 +195,7 @@ public class ChartController {
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
         long newChartId = chart.getId();
-        // todo 发送消息异常处理
+
         biMessageProducer.sendMessage(String.valueOf(newChartId));
         BiResponse biResponse = new BiResponse();
         biResponse.setChartId(newChartId);

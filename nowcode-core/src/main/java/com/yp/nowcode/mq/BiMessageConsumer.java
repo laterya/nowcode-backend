@@ -50,6 +50,11 @@ public class BiMessageConsumer {
         // 先修改图表任务状态为 “执行中”。等执行成功后，修改为 “已完成”、保存执行结果；执行失败后，状态修改为 “失败”，记录任务失败信息。
         Chart updateChart = new Chart();
         updateChart.setId(chart.getId());
+        // 如果状态为运行中防止重复消费，成功失败的状态可以重新生成
+        if (chart.getStatus().equals(ChartStatusConstant.Gen_RUNNING)) {
+            channel.basicNack(deliveryTag, false, false);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "正在生成中");
+        }
         updateChart.setStatus(ChartStatusConstant.Gen_RUNNING);
         boolean b = chartService.updateById(updateChart);
         if (!b) {

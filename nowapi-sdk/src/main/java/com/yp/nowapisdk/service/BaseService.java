@@ -31,7 +31,7 @@ public abstract class BaseService implements ApiService {
     /**
      * 网关HOST
      */
-    private final String gatewayHost = "http://localhost:8090/api";
+    private final String gatewayHost = "http://gateway.laterya.top/api";
 
     @Override
     public <O, T extends ResultResponse> T request(BaseRequest<O, T> request) throws ApiException {

@@ -24,14 +24,8 @@ yuapi:
   client:
     access-key: a67rk7wcggx4ntkj8i17x233pbuk3k7h
     secret-key: t3ftvfi06o4v9smx92j3dk5l0zwt49gc
-  # Elasticsearch 配置
-  #  elasticsearch:
-  #    uris: http://localhost:9200
-  #    username: root
-  #    password: 123456
   servlet:
     multipart:
-      # 大小限制
       max-file-size: 10MB
 server:
   address: 0.0.0.0
@@ -69,13 +63,6 @@ wx:
   open:
     appId: xxx
     appSecret: xxx
-# 对象存储
-cos:
-  client:
-    accessKey: AKIDzpSr25MZrwumYUSK6oLfldT7YCj26ylS
-    secretKey: fDapyCF6kCRYm3BEHAqO4eGHGHDzfMtJ
-    region: ap-shanghai
-    bucket: project-1314859066
 # 接口文档配置
 knife4j:
   enable: true
