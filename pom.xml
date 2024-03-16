@@ -29,7 +29,6 @@
     </properties>
 
     <modules>
-        <module>nowapi-sdk</module>
         <module>nowcode-common</module>
         <module>nowcode-core</module>
         <module>nowcode-gateway</module>

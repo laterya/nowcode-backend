@@ -38,13 +38,13 @@
 
 ## 目录结构 📑
 
-| 目录                                                | 描述            |
-|---------------------------------------------------|---------------|
-| **🏘️ [nowcode-core](./nowcode-core)**            | NowCode后端服务模块 |
-| **🏘️ [nowcode-common](./nowcode-common)**        | 公共服务模块        |
-| **🕸️ [nowcode-gateway](./nowcode-gateway)**      | 网关模块          |
+| 目录                                    | 描述            |
+|---------------------------------------|---------------|
+| **🏘️ [nowcode-core](./nowcode-core)** | NowCode后端服务模块 |
+| **🏘️ [nowcode-common](./nowcode-common)** | 公共服务模块        |
+| **🕸️ [nowcode-gateway](./nowcode-gateway)** | 网关模块          |
 | **🔗 [nowcode-interfaces](./nowcode-interfaces)** | 接口模块          |
-| **🛠 [nowapi-sdk](./nowapi-sdk)**                 | 开发者调用sdk      |
+| **🛠 [nowapi-sdk](https://github.com/laterya/nowapi-sdk)**                 | 开发者调用sdk      |
 
 ## 快速启动 🚀
 
@@ -123,7 +123,3 @@ yarn build or npm run build
 ### 智能分析结论
 
 ![image-20240303143411764](https://picgo-imgs8.oss-cn-shenzhen.aliyuncs.com/img/image-20240303143411764.png)
-
-## 注意事项
-
-1. 因为sonatype暂停了创建项目，故SDK无法推送至maven中央仓库，需要用户自行拉到本地进行打包调试

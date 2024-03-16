@@ -150,7 +150,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.yp</groupId>
+            <groupId>io.github.laterya</groupId>
             <artifactId>aigc-sdk</artifactId>
             <version>0.0.1</version>
         </dependency>

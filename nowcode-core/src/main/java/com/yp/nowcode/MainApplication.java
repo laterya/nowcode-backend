@@ -4,7 +4,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.yp.nowcode.constant.BiMqConstant;
-import com.yp.nowcode.utils.SpringContextUtils;
 import com.yp.nowcodecommon.common.ErrorCode;
 import com.yp.nowcodecommon.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ public class MainApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(MainApplication.class, args);
-        String[] allBeansNames = SpringContextUtils.getAllBeansNames();
     }
 
     @PostConstruct
