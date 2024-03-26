@@ -16,7 +16,6 @@ import com.yp.nowcodegateway.utils.RedissonLockUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.bouncycastle.util.Strings;
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -39,12 +38,11 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static com.yp.nowapisdk.utils.SignUtils.getSign;
-import static com.yp.nowcodegateway.filter.CacheBodyGatewayFilter.CACHE_REQUEST_BODY_OBJECT_KEY;
-
 
 @Component
 @Slf4j
@@ -68,19 +66,13 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 日志
         ServerHttpRequest request = exchange.getRequest();
-        log.info("请求唯一id：" + request.getId());
-        log.info("请求方法：" + request.getMethod());
-        log.info("请求路径：" + request.getPath());
-        log.info("网关本地地址：" + request.getLocalAddress());
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
-        String uri = route.getUri().toString();
-        String path = request.getPath().toString();
-        String address = uri + path;
-        log.info("请求远程地址：" + address);
-        log.info("接口请求IP：" + NetUtils.getIp(request));
-        log.info("url:" + request.getURI());
+        log.info("请求信息：" + "唯一id: {}" +
+                "方法: {}" + "路径: {}" + "网关本地地址: {}" +
+                "请求远程地址: {}" + "接口请求IP: {}" + "完整URL: {}",
+                exchange.getRequest().getId(), exchange.getRequest().getMethod(), exchange.getRequest().getPath(),
+                exchange.getRequest().getLocalAddress(), route.getUri().toString() + request.getPath(), NetUtils.getIp(request), request.getURI());
         return verifyParameters(exchange, chain);
     }
 
@@ -153,22 +145,7 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
             String requestParams = interfaceInfo.getRequestParams();
             List<RequestParamsField> list = new Gson().fromJson(requestParams, new TypeToken<List<RequestParamsField>>() {
             }.getType());
-            if ("POST".equals(method)) {
-                Object cacheBody = exchange.getAttribute(CACHE_REQUEST_BODY_OBJECT_KEY);
-                String requestBody = getPostRequestBody((Flux<DataBuffer>) cacheBody);
-                log.info("POST请求参数：" + requestBody);
-                Map<String, Object> requestBodyMap = new Gson().fromJson(requestBody, new TypeToken<HashMap<String, Object>>() {
-                }.getType());
-                if (StringUtils.isNotBlank(requestParams)) {
-                    for (RequestParamsField requestParamsField : list) {
-                        if ("是".equals(requestParamsField.getRequired())) {
-                            if (StringUtils.isBlank((CharSequence) requestBodyMap.get(requestParamsField.getFieldName())) || !requestBodyMap.containsKey(requestParamsField.getFieldName())) {
-                                throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "请求参数有误，" + requestParamsField.getFieldName() + "为必选项");
-                            }
-                        }
-                    }
-                }
-            } else if ("GET".equals(method)) {
+            if ("GET".equals(method)) {
                 log.info("GET请求参数：" + request.getQueryParams());
                 // 校验请求参数
                 if (StringUtils.isNotBlank(requestParams)) {
@@ -185,23 +162,6 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, e.getMessage());
         }
-    }
-
-    /**
-     * 获取post请求正文
-     *
-     * @param body 身体
-     * @return {@link String}
-     */
-    private String getPostRequestBody(Flux<DataBuffer> body) {
-        AtomicReference<String> getBody = new AtomicReference<>();
-        body.subscribe(buffer -> {
-            byte[] bytes = new byte[buffer.readableByteCount()];
-            buffer.read(bytes);
-            DataBufferUtils.release(buffer);
-            getBody.set(Strings.fromUTF8ByteArray(bytes));
-        });
-        return getBody.get();
     }
 
     /**
@@ -226,24 +186,23 @@ public class GatewayGlobalFilter implements GlobalFilter, Ordered {
                     if (body instanceof Flux) {
                         Flux<? extends DataBuffer> fluxBody = Flux.from(body);
                         // 往返回值里写数据
-                        return super.writeWith(
-                                fluxBody.map(dataBuffer -> {
-                                    // 扣除积分
-                                    redissonLockUtil.redissonDistributedLocks(("gateway_" + user.getUserAccount()).intern(), () -> {
-                                        boolean invoke = interfaceInvokeService.invoke(interfaceInfo.getId(), user.getId(), interfaceInfo.getReduceScore());
-                                        if (!invoke) {
-                                            throw new BusinessException(ErrorCode.OPERATION_ERROR, "接口调用失败");
-                                        }
-                                    }, "接口调用失败");
-                                    byte[] content = new byte[dataBuffer.readableByteCount()];
-                                    dataBuffer.read(content);
-                                    // 释放掉内存
-                                    DataBufferUtils.release(dataBuffer);
-                                    String data = new String(content, StandardCharsets.UTF_8);
-                                    // 打印日志
-                                    log.info("响应结果：" + data);
-                                    return bufferFactory.wrap(content);
-                                }));
+                        return super.writeWith(fluxBody.map(dataBuffer -> {
+                            // 扣除积分
+                            redissonLockUtil.redissonDistributedLocks(("gateway_" + user.getUserAccount()).intern(), () -> {
+                                boolean invoke = interfaceInvokeService.invoke(interfaceInfo.getId(), user.getId(), interfaceInfo.getReduceScore());
+                                if (!invoke) {
+                                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "接口调用失败");
+                                }
+                            }, "接口调用失败");
+                            byte[] content = new byte[dataBuffer.readableByteCount()];
+                            dataBuffer.read(content);
+                            // 释放掉内存
+                            DataBufferUtils.release(dataBuffer);
+                            String data = new String(content, StandardCharsets.UTF_8);
+                            // 打印日志
+                            log.info("响应结果：" + data);
+                            return bufferFactory.wrap(content);
+                        }));
                     } else {
                         // 8. 调用失败，返回一个规范的错误码
                         log.error("<--- {} 响应code异常", getStatusCode());

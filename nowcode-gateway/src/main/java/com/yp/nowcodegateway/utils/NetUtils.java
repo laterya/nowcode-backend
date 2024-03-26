@@ -23,13 +23,13 @@ public class NetUtils {
     public static String getIp(ServerHttpRequest request) {
         HttpHeaders headers = request.getHeaders();
         String ipAddress = headers.getFirst("x-forwarded-for");
-        if (ipAddress == null || ipAddress.length() == 0 || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
             ipAddress = headers.getFirst("Proxy-Client-IP");
         }
-        if (ipAddress == null || ipAddress.length() == 0 || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
             ipAddress = headers.getFirst("WL-Proxy-Client-IP");
         }
-        if (ipAddress == null || ipAddress.length() == 0 || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
+        if (ipAddress == null || ipAddress.isEmpty() || IP_UNKNOWN.equalsIgnoreCase(ipAddress)) {
             ipAddress = Optional.ofNullable(request.getRemoteAddress())
                     .map(address -> address.getAddress().getHostAddress())
                     .orElse("");

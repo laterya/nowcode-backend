@@ -82,7 +82,7 @@ public class BiMessageConsumer {
 
     private boolean extracted(Chart chart) {
         try {
-            String result = aiManager.doChatUseXf(chart.getGoal(), chart.getChartData());
+            String result = aiManager.doChatUseXf(chart.getGoal() + "，请使用" + chart.getChartType(), chart.getChartData());
             String[] strings = chartService.handleAiRet(result);
             String genChart = strings[0];
             String genResult = strings[1];

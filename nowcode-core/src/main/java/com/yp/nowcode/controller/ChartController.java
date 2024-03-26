@@ -221,11 +221,10 @@ public class ChartController {
         // 压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
 
-        StringBuilder userGoal = new StringBuilder();
-        if (StringUtils.isNotBlank(userGoal)) {
-            userGoal.append(goal).append("，请使用").append(chartType);
-        }
-        String result = aiManager.doChatUseXf(userGoal.toString(), csvData);
+        //            userGoal.append("请使用").append(chartType).append("进行图表展示并分析").append(goal);
+//            userGoal.append("请使用").append(chartType).append("进行图表展示并分析").append(goal);
+
+        String result = aiManager.doChatUseXf(goal + "，请使用" + chartType, csvData);
         String[] strings = chartService.handleAiRet(result);
         String genChart = strings[0];
         String genResult = strings[1];
@@ -297,11 +296,7 @@ public class ChartController {
                 return;
             }
             // 调用 AI
-            StringBuilder userGoal = new StringBuilder();
-            if (StringUtils.isNotBlank(userGoal)) {
-                userGoal.append(goal).append("，请使用").append(chartType);
-            }
-            String result = aiManager.doChatUseXf(userGoal.toString(), csvData);
+            String result = aiManager.doChatUseXf(goal + "，请使用" + chartType, csvData);
             String[] strings = chartService.handleAiRet(result);
             String genChart = strings[0];
             String genResult = strings[1];
